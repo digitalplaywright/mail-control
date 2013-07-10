@@ -16,7 +16,7 @@ This gem is inspired by Streama by Christopher Pappas.
 ### Create migration for logged_emails and migrate the database (in your Rails project):
 
 ```ruby
-rails g mail-control:migration
+rails g mail_control:migration
 rake db:migrate
 ```
 
