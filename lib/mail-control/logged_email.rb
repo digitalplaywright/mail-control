@@ -1,5 +1,5 @@
-module LiveActivity
-  module Activity
+module MailControl
+  module LoggedEmail
     extend ActiveSupport::Concern
 
     included do
@@ -15,43 +15,68 @@ module LiveActivity
 
     module ClassMethods
 
-      # Defines a new Activity2 type and registers a definition
+      def poll_for_changes()
+        #if block_given?
+
+        ::LoggedEmail.where('state = ? AND send_after <= ?', 'initial', Time.now).select(:act_target_id).uniq.each do |cur_target|
+          target_id =  cur_target['act_target_id']
+
+          ::LoggedEmail.where('state = ? AND act_target_id = ? AND send_after <= ?', 'initial', target_id, Time.now).select(:verb).uniq.each do |verb|
+
+            changes_for_target =  ::LoggedEmail.where(:act_target_id => target_id, :state => 'initial', :verb => verb['verb'].to_s)
+
+            yield  verb, changes_for_target
+
+            changes_for_target.each do |cft|
+              cft.update_attributes(:state => 'complete')
+            end
+
+
+
+          end
+
+
+        end
+      end
+
+
+      # Defines a new LoggedEmail2 type and registers a definition
       #
-      # @param [ String ] name The name of the activity
+      # @param [ String ] name The name of the queued_task
       #
-      # @example Define a new activity
-      #   activity(:enquiry) do
+      # @example Define a new queued_task
+      #   queued_task(:enquiry) do
       #     actor :user, :cache => [:full_name]
       #     act_object :enquiry, :cache => [:subject]
       #     act_target :listing, :cache => [:title]
       #   end
       #
       # @return [Definition] Returns the registered definition
-      def activity(name, &block)
-        definition = LiveActivity::DefinitionDSL.new(name)
+      def queued_task(name, &block)
+        definition = MailControl::DefinitionDSL.new(name)
         definition.instance_eval(&block)
-        LiveActivity::Definition.register(definition)
+        MailControl::Definition.register(definition)
       end
 
-      # Publishes an activity using an activity name and data
+      # Publishes an queued_task using an queued_task name and data
       #
-      # @param [ String ] verb The verb of the activity
-      # @param [ Hash ] data The data to initialize the activity with.
+      # @param [ String ] verb The verb of the queued_task
+      # @param [ Hash ] data The data to initialize the queued_task with.
       #
-      # @return [LiveActivity::Activity2] An Activity instance with data
-      def publish(verb, data)
-        new.publish({:verb => verb}.merge(data))
+      # @return [MailControl::LoggedEmail2] An LoggedEmail instance with data
+      def send_email(verb, data)
+        new.send_email({:verb => verb}.merge(data))
       end
 
     end
 
 
 
-    # Publishes the activity to the receivers
+    # Publishes the queued_task to the receivers
     #
-    # @param [ Hash ] options The options to publish with.
+    # @param [ Hash ] options The options to send_email with.
     #
-    def publish(data = {})
+    def send_email(data = {})
       assign_properties(data)
 
       self
@@ -68,9 +93,14 @@ module LiveActivity
 
       self.verb      = data.delete(:verb)
 
-      cur_receivers  = data.delete(:receivers)
 
+      write_attribute(:send_after, data[:send_after])
+      data.delete(:send_after)
 
+      write_attribute(:send_before, data[:send_before])
+      data.delete(:send_before)
+
+      self.state = 'initial'
 
       [:actor, :act_object, :act_target].each do |type|
 
@@ -79,7 +109,7 @@ module LiveActivity
         unless cur_object
           if definition.send(type.to_sym)
             raise verb.to_json
-            #raise LiveActivity::InvalidData.new(type)
+            #raise MailControl::InvalidData.new(type)
           else
             next
 
@@ -88,7 +118,7 @@ module LiveActivity
 
         class_sym = cur_object.class.name.to_sym
 
-        raise LiveActivity::InvalidData.new(class_sym) unless definition.send(type) == class_sym
+        raise MailControl::InvalidData.new(class_sym) unless definition.send(type) == class_sym
 
         case type
           when :actor
@@ -113,7 +143,7 @@ module LiveActivity
         if grp_object == nil
           if definition.send(group.to_sym)
             raise verb.to_json
-            #raise LiveActivity::InvalidData.new(group)
+            #raise MailControl::InvalidData.new(group)
           else
             next
 
@@ -121,7 +151,7 @@ module LiveActivity
         end
 
         grp_object.each do |cur_obj|
-          raise LiveActivity::InvalidData.new(class_sym) unless definition.send(group) == cur_obj.class.name.to_sym
+          raise MailControl::InvalidData.new(class_sym) unless definition.send(group) == cur_obj.class.name.to_sym
 
           self.grouped_actors << cur_obj
 
@@ -135,6 +165,16 @@ module LiveActivity
 
       if cur_bond_type
         write_attribute( :bond_type, cur_bond_type.to_s )
+      end
+
+      if definition.send(:unsubscribe_by)
+        write_attribute(:unsubscribe_by, definition.send(:unsubscribe_by))
+      else
+        raise "definition must define unsubscribe_by option"
+      end
+
+      if self.act_target.is_unsubscribed_to?(self)
+        self.state = 'unsubscribed'
       end
 
       def_options = definition.send(:options)
@@ -165,17 +205,10 @@ module LiveActivity
       self.save
 
 
-      if cur_receivers
-        cur_receivers.each do |sp|
-          send(sp.class.to_s.tableize) << sp
-        end
-      end
-
-
     end
 
     def definition
-      @definition ||= LiveActivity::Definition.find(verb)
+      @definition ||= MailControl::Definition.find(verb)
     end
 
 

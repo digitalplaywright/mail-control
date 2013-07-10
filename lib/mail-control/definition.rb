@@ -1,10 +1,12 @@
-module LiveActivity
+module MailControl
 
   class Definition
 
-    attr_reader :name, :actor, :act_object, :act_target, :grouped_actor, :bond_type, :options,  :receivers
+    attr_reader :name, :actor, :act_object, :act_target, :grouped_actor, :bond_type, :options
+    attr_reader :unsubscribe_by
 
-    # @param dsl [LiveActivity::DefinitionDSL] A DSL act_object
+
+    # @param dsl [MailControl::DefinitionDSL] A DSL act_object
     def initialize(definition)
       @name             = definition[:name]
       @actor            = definition[:actor]         || nil
@@ -13,6 +15,8 @@ module LiveActivity
       @grouped_actor    = definition[:grouped_actor] || nil
       @bond_type        = definition[:bond_type]     || nil
       @options          = definition[:options]       || []
+      @unsubscribe_by = definition[:unsubscribe_by] || nil
+
     end
 
     #
@@ -28,14 +32,14 @@ module LiveActivity
     end
 
     # List of registered definitions
-    # @return [Array<LiveActivity::Definition>]
+    # @return [Array<MailControl::Definition>]
     def self.registered
       @definitions ||= []
     end
 
     def self.find(name)
       unless definition = registered.find{|definition| definition.name == name.to_sym}
-        raise LiveActivity::InvalidActivity, "Could not find a definition for `#{name}`"
+        raise MailControl::InvalidLoggedEmail, "Could not find a definition for `#{name}`"
       else
         definition
       end

@@ -1,0 +1,1 @@
+../../lib/generators/mail-control/migration/templates/migration.rb

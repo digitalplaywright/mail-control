@@ -4,7 +4,7 @@ Bundler.setup(:default, :test)
 
 $:.unshift File.expand_path('../../lib/', __FILE__)
 require 'active_support/testing/setup_and_teardown'
-require 'live_activity'
+require 'mail-control'
 require 'minitest/autorun'
 
 #LiveStream.config # touch config to load ORM, needed in some separate tests
@@ -23,45 +23,49 @@ class ActiveSupport::TestCase
   # Add more helper methods to be used by all tests here...
 end
 
-class Activity < ActiveRecord::Base
-  include LiveActivity::Activity
+class LoggedEmail < ActiveRecord::Base
+  include MailControl::LoggedEmail
 
-  has_and_belongs_to_many :users
-
-  activity :new_enquiry do
+  queued_task :new_enquiry do
     actor        :User
     act_object   :Article
-    act_target   :Volume
+    act_target   :User
     #option       :description
+    unsubscribe_by :option_1
   end
 
-  activity :test_description do
+  queued_task :test_description do
     actor        :User
     act_object   :Article
-    act_target   :Volume
+    act_target   :User
     option       :description
+    unsubscribe_by :option_1
   end
 
-  activity :test_option do
+  queued_task :test_option do
     actor        :User
     act_object   :Article
-    act_target   :Volume
+    act_target   :User
     option       :country
+    unsubscribe_by :option_1
   end
 
-  activity :test_bond_type do
+  queued_task :test_bond_type do
     actor        :User
     act_object   :Article
-    act_target   :Volume
+    act_target   :User
     bond_type    :global
+    unsubscribe_by :option_1
   end
 
 end
 
 class User < ActiveRecord::Base
-  include LiveActivity::Actor
+  include MailControl::Actor
 
-  has_and_belongs_to_many :activities
+  def is_unsubscribed_to?(_logged_email)
+    _logged_email.unsubscribe_by == 'i_am_unsubscribed'
+  end
 
 end
 

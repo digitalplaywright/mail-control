@@ -1,6 +1,6 @@
 require 'active_support'
 
-module LiveActivity
+module MailControl
 
   class DefinitionDSL
 
@@ -15,6 +15,7 @@ module LiveActivity
           :grouped_actor    => nil,
           :reverses         => nil,
           :bond_type        => nil,
+          :unsubscribe_by => nil,
           :options          => nil
       }
     end
@@ -41,7 +42,7 @@ module LiveActivity
       end
     end
 
-    data_methods :actor, :act_object, :act_target, :grouped_actor, :bond_type
+    data_methods :actor, :act_object, :act_target, :grouped_actor, :bond_type, :unsubscribe_by
 
   end
   

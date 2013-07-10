@@ -1,6 +1,6 @@
 class AddNonstandardToActivities < ActiveRecord::Migration
   def change
-    change_table :activities do |t|
+    change_table :logged_emails do |t|
       t.string :nonstandard
     end
   end

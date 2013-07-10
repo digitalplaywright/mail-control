@@ -1,0 +1,9 @@
+require 'active_record'
+require 'active_support'
+require 'active_support/core_ext/module/delegation.rb'
+require "mail-control/version"
+require "mail-control/actor"
+require "mail-control/logged_email"
+require "mail-control/definition"
+require "mail-control/definition_dsl"
+require "mail-control/errors"

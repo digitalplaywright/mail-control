@@ -1,54 +1,42 @@
 class ActorTest < ActiveSupport::TestCase
 
 
-  def test_publish_activity
+  def test_send_email
 
     _user = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
-    activity = _user.publish_activity(:new_enquiry, :act_object => _article, :act_target => _volume)
+    queued_task = _user.send_email(:new_enquiry,  :send_after => Time.now, :send_before => Time.now + 1.hour, :act_object => _article, :act_target => _user_t  )
 
-    assert activity.persisted?
-
-  end
-
-  def test_pushes_to_a_defined_stream
-    _user    = User.create()
-    _user_2  = User.create()
-    _article = Article.create()
-    _volume  = Volume.create()
-
-    _activity = _user.publish_activity(:new_enquiry, :act_object => _article, :act_target => _volume,
-                                       :receivers => [_user_2])
-    assert _activity.users.size == 1
+    assert queued_task.persisted?
 
   end
 
   def test_retrieves_the_stream_for_an_actor
     _user    = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
-    _user.publish_activity(:new_enquiry, :act_object => _article, :act_target => _volume, :receivers => [_user])
-    _user.publish_activity(:new_enquiry, :act_object => _article, :act_target => _volume, :receivers => [_user])
+    _user.send_email(:new_enquiry, :send_after => Time.now, :send_before => Time.now + 1.hour,  :act_object => _article, :act_target => _user_t  )
+    _user.send_email(:new_enquiry,  :send_after => Time.now, :send_before => Time.now + 1.hour, :act_object => _article, :act_target => _user_t  )
 
-    assert _user.activity_stream.size == 2
+    assert _user.logged_emails.size == 2
 
   end
 
 
-  def test_retrieves_the_stream_for_a_particular_activity_type
+  def test_retrieves_the_stream_for_a_particular_queued_task_type
     _user = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
-    _user.publish_activity(:new_enquiry, :act_object => _article, :act_target => _volume, :receivers => [_user])
-    _user.publish_activity(:new_enquiry, :act_object => _article, :act_target => _volume, :receivers => [_user])
-    _user.publish_activity(:test_bond_type, :act_object => _article, :act_target => _volume, :receivers => [_user])
+    _user.send_email(:new_enquiry, :send_after => Time.now, :send_before => Time.now + 1.hour,  :act_object => _article, :act_target => _user_t  )
+    _user.send_email(:new_enquiry,  :send_after => Time.now, :send_before => Time.now + 1.hour, :act_object => _article, :act_target => _user_t  )
+    _user.send_email(:test_bond_type,  :send_after => Time.now, :send_before => Time.now + 1.hour, :act_object => _article, :act_target => _user_t  )
 
-    assert _user.activity_stream(:verb      => 'new_enquiry').size == 2
-    assert _user.activity_stream(:bond_type => 'global').size == 1
+    assert _user.actor_logged_emails(:verb      => 'new_enquiry').size == 2
+    assert _user.actor_logged_emails(:bond_type => 'global').size == 1
 
   end
 

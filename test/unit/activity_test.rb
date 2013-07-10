@@ -1,4 +1,4 @@
-class ActivityTest < ActiveSupport::TestCase
+class LoggedEmailTest < ActiveSupport::TestCase
 
   def test_truth
     assert true
@@ -6,74 +6,81 @@ class ActivityTest < ActiveSupport::TestCase
 
   def test_register_definition
 
-    @definition = Activity.activity(:test_activity) do
+    @definition = LoggedEmail.queued_task(:test_queued_task) do
       actor :user, :cache => [:full_name]
       act_object :listing, :cache => [:title, :full_address]
       act_target :listing, :cache => [:title]
     end
 
-    assert @definition.is_a?(LiveActivity::Definition)
+    assert @definition.is_a?(MailControl::Definition)
 
   end
 
-  def test_push_activity_to_receivers
-    _user    = User.create()
-    _user_2  = User.create()
-    _article = Article.create()
-    _volume  = Volume.create()
-
-    _activity = Activity.publish(:new_enquiry, :actor => _user, :act_object => _article, :act_target => _volume,
-                                 :receivers => [_user_2])
-    assert _activity.users.size == 1
-
-  end
-
-  def test_publish_new_activity
+  def test_publish_new_queued_task
     _user    = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
-    _activity = Activity.publish(:new_enquiry, :actor => _user, :act_object => _article, :act_target => _volume)
+    _queued_task = LoggedEmail.send_email(:new_enquiry, :send_after => Time.now, :send_before => Time.now + 1.hour,  :actor => _user, :act_object => _article, :act_target => _user_t )
 
-    assert _activity.persisted?
-    #_activity.should be_an_instance_of Activity
+    assert _queued_task.persisted?
+    #_queued_task.should be_an_instance_of LoggedEmail
 
   end
 
   def test_description
     _user    = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
     _description = "this is a test"
-    _activity = Activity.publish(:test_description, :actor => _user, :act_object => _article, :act_target => _volume,
+    _queued_task = LoggedEmail.send_email(:test_description, :send_after => Time.now, :send_before => Time.now + 1.hour,   :actor => _user, :act_object => _article, :act_target => _user_t ,
                                  :description => _description )
 
-    assert _activity.description  == _description
+    assert _queued_task.description  == _description
 
   end
 
   def test_options
     _user    = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
     _country = "denmark"
-    _activity = Activity.publish(:test_option, :actor => _user, :act_object => _article, :act_target => _volume,
+    _queued_task = LoggedEmail.send_email(:test_option, :send_after => Time.now, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t ,
                                  :country => _country )
 
-    assert _activity.options[:country]  == _country
+    assert _queued_task.options[:country]  == _country
 
   end
 
   def test_bond_type
     _user    = User.create()
     _article = Article.create()
-    _volume  = Volume.create()
+    _user_t  = User.create()
 
-    _activity = Activity.publish(:test_bond_type, :actor => _user, :act_object => _article, :act_target => _volume)
+    _queued_task = LoggedEmail.send_email(:test_bond_type, :send_after => Time.now, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t )
 
-    assert _activity.bond_type  == 'global'
+    assert _queued_task.bond_type  == 'global'
+
+  end
+
+  def test_poll_changes
+
+    _user    = User.create()
+    _article = Article.create()
+    _user_t  = User.create()
+
+    _activity = LoggedEmail.send_email(:test_bond_type, :send_after => Time.now - 1.hour, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t )
+
+    assert LoggedEmail.all.size > 0
+
+
+    LoggedEmail.poll_for_changes() do |verb, hash|
+      #assert hash[:actor].id == _user.id
+    end
+
+    assert LoggedEmail.where('state = ? AND act_target_id = ?', 'initial', _user_t.id).size == 0
 
   end
 

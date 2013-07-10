@@ -1,9 +1,9 @@
-module LiveActivity
+module MailControl
   
-  class LiveActivityError < StandardError
+  class MailControlError < StandardError
   end
   
-  class InvalidActivity < LiveActivityError
+  class InvalidLoggedEmail < MailControlError
   end
   
   # This error is raised when an act_object isn't defined
@@ -12,7 +12,7 @@ module LiveActivity
   # Example:
   #
   # <tt>InvalidField.new('field_name')</tt>
-  class InvalidData < LiveActivityError
+  class InvalidData < MailControlError
     attr_reader :message
 
     def initialize message
@@ -26,7 +26,7 @@ module LiveActivity
   # Example:
   #
   # <tt>InvalidField.new('field_name')</tt>
-  class InvalidField < LiveActivityError
+  class InvalidField < MailControlError
     attr_reader :message
 
     def initialize message
@@ -35,10 +35,10 @@ module LiveActivity
 
   end
   
-  class ActivityNotSaved < LiveActivityError
+  class LoggedEmailNotSaved < MailControlError
   end
   
-  class NoFollowersDefined < LiveActivityError
+  class NoFollowersDefined < MailControlError
   end
   
 end
