@@ -7,7 +7,7 @@ module MailControl
     module Base
       # Get path for migration template
       def source_root
-        @_mail_control_source_root ||= File.expand_path(File.join('../mail-control', generator_name, 'templates'), __FILE__)
+        @_mail_control_source_root ||= File.expand_path(File.join('../mail_control', generator_name, 'templates'), __FILE__)
       end
     end
   end

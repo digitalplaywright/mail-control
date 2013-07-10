@@ -1,7 +1,7 @@
-require 'generators/mail-control'
+require 'generators/mail_control'
 require 'rails/generators/active_record'
 
-module LiveStream
+module MailControl
   module Generators
     # Migration generator that creates migration file from template
     class MigrationGenerator < ActiveRecord::Generators::Base

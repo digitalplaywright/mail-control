@@ -1,4 +1,4 @@
-require 'generators/mail-control'
+require 'generators/mail_control'
 require 'rails/generators/active_record'
 
 module MailControl
