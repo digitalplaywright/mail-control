@@ -3,7 +3,7 @@ require 'rails/generators/active_record'
 
 module MailControl
   module Generators
-    # LoggedEmail generator that creates queued_task model file from template
+    # LoggedEmail generator that creates mailing model file from template
     class LoggedEmailGenerator < ActiveRecord::Generators::Base
       extend Base
 

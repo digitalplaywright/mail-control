@@ -22,15 +22,15 @@ rake db:migrate
 
 ### Define Queued Task
 
-Create an LoggedEmail model and define the logged_emails and the fields you would like to cache within the queued_task.
+Create an LoggedEmail model and define the logged_emails and the fields you would like to cache within the mailing.
 
-An queued_task consists of an actor, a verb, an act_object, and a target.
+An mailing consists of an actor, a verb, an act_object, and a target.
 
 ``` ruby
 class LoggedEmail < ActiveRecord::Base
   include MailControl::LoggedEmail
 
-  queued_task :new_enquiry do
+  mailing :new_enquiry do
     actor        :User
     act_object   :Article
     act_target   :Volume
@@ -38,9 +38,9 @@ class LoggedEmail < ActiveRecord::Base
 end
 ```
 
-The queued_task verb is implied from the queued_task name, in the above example the verb is :new_enquiry
+The mailing verb is implied from the mailing name, in the above example the verb is :new_enquiry
 
-The act_object may be the entity performing the queued_task, or the entity on which the queued_task was performed.
+The act_object may be the entity performing the mailing, or the entity on which the mailing was performed.
 e.g John(actor) shared a video(act_object)
 
 The target is the act_object that the verb is enacted on.
@@ -69,18 +69,18 @@ In your controller or background worker:
 current_user.send_email(:new_enquiry, :act_object => @enquiry, :target => @listing)
 ```
   
-This will publish the queued_task to the mongoid act_objects returned by the #followers method in the Actor.
+This will publish the mailing to the mongoid act_objects returned by the #followers method in the Actor.
 
 
 ## Retrieving LoggedEmail
 
-To retrieve all queued_task for an actor
+To retrieve all mailing for an actor
 
 ``` ruby
 current_user.logged_emails
 ```
   
-To retrieve and filter to a particular queued_task type
+To retrieve and filter to a particular mailing type
 
 ``` ruby
 current_user.logged_emails(:verb => 'new_enquiry')
@@ -94,7 +94,7 @@ Additional options can be required:
 class LoggedEmail < ActiveRecord::Base
   include MailControl::LoggedEmail
 
-  queued_task :new_enquiry do
+  mailing :new_enquiry do
     actor        :User
     act_object   :Article
     act_target   :Volume
@@ -110,13 +110,13 @@ The option fields are stored using the ActiveRecord 'store' feature.
 #### Bond type
 
 A verb can have one bond type. This bond type can be used to classify and quickly retrieve
-queued_task feed items that belong to a particular aggregate feed, like e.g the global feed.
+mailing feed items that belong to a particular aggregate feed, like e.g the global feed.
 
 ``` ruby
 class LoggedEmail < ActiveRecord::Base
   include MailControl::LoggedEmail
 
-  queued_task :new_enquiry do
+  mailing :new_enquiry do
     actor        :User
     act_object   :Article
     act_target   :Volume

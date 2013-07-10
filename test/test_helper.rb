@@ -26,7 +26,7 @@ end
 class LoggedEmail < ActiveRecord::Base
   include MailControl::LoggedEmail
 
-  queued_task :new_enquiry do
+  mailing :new_enquiry do
     actor        :User
     act_object   :Article
     act_target   :User
@@ -34,7 +34,7 @@ class LoggedEmail < ActiveRecord::Base
     unsubscribe_by :option_1
   end
 
-  queued_task :test_description do
+  mailing :test_description do
     actor        :User
     act_object   :Article
     act_target   :User
@@ -42,7 +42,7 @@ class LoggedEmail < ActiveRecord::Base
     unsubscribe_by :option_1
   end
 
-  queued_task :test_option do
+  mailing :test_option do
     actor        :User
     act_object   :Article
     act_target   :User
@@ -50,7 +50,7 @@ class LoggedEmail < ActiveRecord::Base
     unsubscribe_by :option_1
   end
 
-  queued_task :test_bond_type do
+  mailing :test_bond_type do
     actor        :User
     act_object   :Article
     act_target   :User

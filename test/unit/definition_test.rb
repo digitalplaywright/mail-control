@@ -42,9 +42,9 @@ class DefinitionTest < ActiveSupport::TestCase
 
   end
 
-  def test_raise_exception_if_invalid_queued_task
+  def test_raise_exception_if_invalid_mailing
 
-    assert_raises(MailControl::InvalidLoggedEmail){ MailControl::Definition.find(:unknown_queued_task) }
+    assert_raises(MailControl::InvalidLoggedEmail){ MailControl::Definition.find(:unknown_mailing) }
 
   end
 

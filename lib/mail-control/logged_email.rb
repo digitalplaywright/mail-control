@@ -42,26 +42,26 @@ module MailControl
 
       # Defines a new LoggedEmail2 type and registers a definition
       #
-      # @param [ String ] name The name of the queued_task
+      # @param [ String ] name The name of the mailing
       #
-      # @example Define a new queued_task
-      #   queued_task(:enquiry) do
+      # @example Define a new mailing
+      #   mailing(:enquiry) do
       #     actor :user, :cache => [:full_name]
       #     act_object :enquiry, :cache => [:subject]
       #     act_target :listing, :cache => [:title]
       #   end
       #
       # @return [Definition] Returns the registered definition
-      def queued_task(name, &block)
+      def mailing(name, &block)
         definition = MailControl::DefinitionDSL.new(name)
         definition.instance_eval(&block)
         MailControl::Definition.register(definition)
       end
 
-      # Publishes an queued_task using an queued_task name and data
+      # Publishes an mailing using an mailing name and data
       #
-      # @param [ String ] verb The verb of the queued_task
-      # @param [ Hash ] data The data to initialize the queued_task with.
+      # @param [ String ] verb The verb of the mailing
+      # @param [ Hash ] data The data to initialize the mailing with.
       #
       # @return [MailControl::LoggedEmail2] An LoggedEmail instance with data
       def send_email(verb, data)
@@ -72,7 +72,7 @@ module MailControl
 
 
 
-    # Publishes the queued_task to the receivers
+    # Publishes the mailing to the receivers
     #
     # @param [ Hash ] options The options to send_email with.
     #

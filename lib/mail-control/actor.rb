@@ -4,7 +4,7 @@ module MailControl
     extend ActiveSupport::Concern
 
     included do
-      cattr_accessor :queued_task_klass
+      cattr_accessor :mailing_klass
 
       has_many :logged_emails,             :class_name => "LoggedEmail", :as => :actor
       has_many :act_object_logged_emails,  :class_name => "LoggedEmail", :as => :act_object
@@ -16,17 +16,17 @@ module MailControl
     module ClassMethods
 
       def mail_control_class(klass)
-        self.queued_task_klass = klass.to_s
+        self.mailing_klass = klass.to_s
       end
 
     end
 
 
-    # Publishes the queued_task to the receivers
+    # Publishes the mailing to the receivers
     #
     # @param [ Hash ] options The options to publish with.
     #
-    # @example publish an queued_task with a act_object and act_target
+    # @example publish an mailing with a act_object and act_target
     #   current_user.send_email(:enquiry, :act_object => @enquiry, :act_target => @listing)
     #
     def send_email(name, options={})
@@ -40,7 +40,7 @@ module MailControl
     end
 
     def mail_control_class
-      @queued_task_klass ||= queued_task_klass ? queued_task_klass.classify.constantize : ::LoggedEmail
+      @mailing_klass ||= mailing_klass ? mailing_klass.classify.constantize : ::LoggedEmail
     end
 
     def actor_logged_emails(options = {})

@@ -6,7 +6,7 @@ class LoggedEmailTest < ActiveSupport::TestCase
 
   def test_register_definition
 
-    @definition = LoggedEmail.queued_task(:test_queued_task) do
+    @definition = LoggedEmail.mailing(:test_mailing) do
       actor :user, :cache => [:full_name]
       act_object :listing, :cache => [:title, :full_address]
       act_target :listing, :cache => [:title]
@@ -16,15 +16,15 @@ class LoggedEmailTest < ActiveSupport::TestCase
 
   end
 
-  def test_publish_new_queued_task
+  def test_publish_new_mailing
     _user    = User.create()
     _article = Article.create()
     _user_t  = User.create()
 
-    _queued_task = LoggedEmail.send_email(:new_enquiry, :send_after => Time.now, :send_before => Time.now + 1.hour,  :actor => _user, :act_object => _article, :act_target => _user_t )
+    _mailing = LoggedEmail.send_email(:new_enquiry, :send_after => Time.now, :send_before => Time.now + 1.hour,  :actor => _user, :act_object => _article, :act_target => _user_t )
 
-    assert _queued_task.persisted?
-    #_queued_task.should be_an_instance_of LoggedEmail
+    assert _mailing.persisted?
+    #_mailing.should be_an_instance_of LoggedEmail
 
   end
 
@@ -34,10 +34,10 @@ class LoggedEmailTest < ActiveSupport::TestCase
     _user_t  = User.create()
 
     _description = "this is a test"
-    _queued_task = LoggedEmail.send_email(:test_description, :send_after => Time.now, :send_before => Time.now + 1.hour,   :actor => _user, :act_object => _article, :act_target => _user_t ,
+    _mailing = LoggedEmail.send_email(:test_description, :send_after => Time.now, :send_before => Time.now + 1.hour,   :actor => _user, :act_object => _article, :act_target => _user_t ,
                                  :description => _description )
 
-    assert _queued_task.description  == _description
+    assert _mailing.description  == _description
 
   end
 
@@ -47,10 +47,10 @@ class LoggedEmailTest < ActiveSupport::TestCase
     _user_t  = User.create()
 
     _country = "denmark"
-    _queued_task = LoggedEmail.send_email(:test_option, :send_after => Time.now, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t ,
+    _mailing = LoggedEmail.send_email(:test_option, :send_after => Time.now, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t ,
                                  :country => _country )
 
-    assert _queued_task.options[:country]  == _country
+    assert _mailing.options[:country]  == _country
 
   end
 
@@ -59,9 +59,9 @@ class LoggedEmailTest < ActiveSupport::TestCase
     _article = Article.create()
     _user_t  = User.create()
 
-    _queued_task = LoggedEmail.send_email(:test_bond_type, :send_after => Time.now, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t )
+    _mailing = LoggedEmail.send_email(:test_bond_type, :send_after => Time.now, :send_before => Time.now + 1.hour, :actor => _user, :act_object => _article, :act_target => _user_t )
 
-    assert _queued_task.bond_type  == 'global'
+    assert _mailing.bond_type  == 'global'
 
   end
 

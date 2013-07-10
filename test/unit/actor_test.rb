@@ -7,9 +7,9 @@ class ActorTest < ActiveSupport::TestCase
     _article = Article.create()
     _user_t  = User.create()
 
-    queued_task = _user.send_email(:new_enquiry,  :send_after => Time.now, :send_before => Time.now + 1.hour, :act_object => _article, :act_target => _user_t  )
+    mailing = _user.send_email(:new_enquiry,  :send_after => Time.now, :send_before => Time.now + 1.hour, :act_object => _article, :act_target => _user_t  )
 
-    assert queued_task.persisted?
+    assert mailing.persisted?
 
   end
 
@@ -26,7 +26,7 @@ class ActorTest < ActiveSupport::TestCase
   end
 
 
-  def test_retrieves_the_stream_for_a_particular_queued_task_type
+  def test_retrieves_the_stream_for_a_particular_mailing_type
     _user = User.create()
     _article = Article.create()
     _user_t  = User.create()
