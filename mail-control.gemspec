@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{LoggedEmail Streams for rails}
   s.description = %q{MailControl is a simple gem for giving both your app and users control over when, if and how emails are sent out.}
   s.homepage    = 'https://github.com/digitalplaywright/mail-control'
+  s.license     = 'MIT'
 
   s.rubyforge_project = "mail-control"
 
